@@ -1887,7 +1887,7 @@ If 0, target is file and converted file will automatically be opend."
           (insert org-pandoc-epub-meta))))
     (if noninteractive
       (org-pandoc-run input-file output-file format
-                      'org-pandoc-sentinel org-pandoc-option-table)
+                      nil org-pandoc-option-table)
       (let ((process
              (org-pandoc-run input-file output-file format
                              'org-pandoc-sentinel org-pandoc-option-table)))
@@ -1936,8 +1936,9 @@ Called on completion of an asynchronous pandoc process."
 (defun org-pandoc-run (input-file output-file format sentinel &optional options)
   "Run pandoc command with INPUT-FILE (org), OUTPUT-FILE, FORMAT and OPTIONS.
 If BUFFER-OR-FILE is buffer, then output to specified buffer. OPTIONS is
-a hashtable.  Pandoc runs asynchronously and SENTINEL is called
-when the process completes."
+a hashtable.  When Emacs is run in interactive mode (`noninteractive' is nil),
+Pandoc runs asynchronously and SENTINEL is called when the process completes.
+Otherwise, a synchronous pandoc process is called."
   (let* ((format (symbol-name format))
          (output-format
           (car (--filter (string-prefix-p format it)
@@ -1961,7 +1962,7 @@ when the process completes."
 	     (apply 'call-process `(,org-pandoc-command nil nil nil ,@args))))
 	(if (= exit-status 0)
           (message "Exported to %s." output-file)
-          (message "Error occured when exporting to %s, %d" output-file exit-status)))
+          (message "Error occured when exporting to %s, exit code: %d" output-file exit-status)))
       (let ((process
              (apply 'start-process
                     `("pandoc" ,(generate-new-buffer "*Pandoc*")
