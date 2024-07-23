@@ -1957,7 +1957,11 @@ when the process completes."
             ,(expand-file-name input-file))))
     (message "Running pandoc with args: %s" args)
     (if noninteractive
-      (apply 'call-process `(,org-pandoc-command nil nil nil ,@args))
+      (let ((exit-status
+	     (apply 'call-process `(,org-pandoc-command nil nil nil ,@args))))
+	(if (= exit-status 0)
+          (message "Exported to %s." output-file)
+          (message "Error occured when exporting to %s, %d" output-file exit-status)))
       (let ((process
              (apply 'start-process
                     `("pandoc" ,(generate-new-buffer "*Pandoc*")
